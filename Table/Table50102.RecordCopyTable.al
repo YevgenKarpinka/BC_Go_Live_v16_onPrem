@@ -25,11 +25,15 @@ table 50102 "Record Copy Table"
         field(8; Rank; Integer)
         {
         }
+        field(9; "Entity Code"; Code[20])
+        {
+            TableRelation = "Entity Clone";
+        }
     }
 
     keys
     {
-        key(Key1; "Table ID")
+        key(Key1; "Entity Code", "Table ID")
         {
         }
     }

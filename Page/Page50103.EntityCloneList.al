@@ -2,8 +2,10 @@ page 50103 "Entity Clone List"
 {
     PageType = List;
     ApplicationArea = All;
-    UsageCategory = Administration;
     SourceTable = "Entity Clone";
+    InsertAllowed = True;
+    Editable = True;
+    UsageCategory = Tasks;
 
     layout
     {

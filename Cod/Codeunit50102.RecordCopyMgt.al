@@ -52,6 +52,53 @@ codeunit 50102 "Record Copy Mgt."
         Text0002: Label 'Copying Records!\Delete All: #3######\Company: #2########\Table: #1#######';
         Text0003: Label 'Blocking Customers!\Company: #1########\Customer: #2#######';
 
+    procedure CopyRecordsByCodeFilter(CodeFilter: Code[30]; flgDeleteAll: Boolean)
+    var
+        Window: Dialog;
+        RecRefFrom: RecordRef;
+        RecRefTo: RecordRef;
+        IntegrationCompany: Record "Company Integration";
+        RecordCopyTable: Record "Record Copy Table";
+    begin
+        CheckCompanyFrom();
+
+        if not Confirm(Text0001, false) then
+            exit;
+
+        Window.Open(Text0002);
+
+        RecordCopyTable.SetCurrentKey("Entity Code", Rank);
+        RecordCopyTable.SetFilter("Entity Code", CodeFilter);
+        IntegrationCompany.SetRange("Copy Items To", true);
+        if IntegrationCompany.FindSet(false, false) then
+            repeat
+                Window.Update(2, IntegrationCompany."Company Name");
+                if RecordCopyTable.FindSet(false, false) then
+                    repeat
+                        Window.Update(1, Format(RecordCopyTable."Table ID"));
+                        RecRefFrom.Open(RecordCopyTable."Table ID", false, CompanyName);
+                        RecRefTo.Open(RecordCopyTable."Table ID", false, IntegrationCompany."Company Name");
+                        Window.Update(3, Format(RecordCopyTable."DeleteAll Before"));
+                        if flgDeleteAll then
+                            RecRefTo.DeleteAll();
+                        if RecRefFrom.FindSet(false, false) then
+                            repeat
+                                if RecRefToFindRec(RecRefTo, RecRefFrom) then begin
+                                    CopyRecord(RecRefTo, RecRefFrom);
+                                    RecRefTo.Modify();
+                                end else begin
+                                    CopyRecord(RecRefTo, RecRefFrom);
+                                    RecRefTo.Insert();
+                                end;
+                            until RecRefFrom.Next() = 0;
+                        RecRefTo.Close();
+                        RecRefFrom.Close;
+                    until RecordCopyTable.Next = 0;
+            until IntegrationCompany.Next() = 0;
+
+        Window.Close;
+    end;
+
     procedure CopyRecords(var RecordCopyTable: Record "Record Copy Table")
     var
         Window: Dialog;
@@ -220,4 +267,5 @@ codeunit 50102 "Record Copy Mgt."
             until IntegrationCompany.Next() = 0;
         Window.Close;
     end;
+
 }

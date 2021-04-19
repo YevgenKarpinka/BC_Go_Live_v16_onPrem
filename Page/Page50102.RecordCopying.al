@@ -17,29 +17,35 @@ page 50102 "Record Copying"
         {
             repeater(Group)
             {
+                field("Entity Code"; "Entity Code")
+                {
+                    ApplicationArea = All;
+                    CaptionML = ENU = 'Entity Code';
+                    ToolTip = 'Insert Entity Code to copy';
+                }
                 field("Table ID"; "Table ID")
                 {
                     ApplicationArea = All;
                     CaptionML = ENU = 'Table ID';
-                    ToolTip = 'Insert table no. to Copy';
+                    ToolTip = 'Insert table no. to copy';
                 }
                 field("Table Name"; "Table Name")
                 {
                     ApplicationArea = All;
                     CaptionML = ENU = 'Table Name';
-                    ToolTip = 'Specify table name to Copy';
+                    ToolTip = 'Specify table name to copy';
                 }
                 field(Rank; Rank)
                 {
                     ApplicationArea = All;
-                    CaptionML = ENU = 'Table Name';
-                    ToolTip = 'Specify rank table to Copy';
+                    CaptionML = ENU = 'Rank';
+                    ToolTip = 'Specify rank table to copy';
                 }
                 field("DeleteAll Before"; "DeleteAll Before")
                 {
                     ApplicationArea = All;
-                    CaptionML = ENU = 'DeleteAll Before';
-                    ToolTip = 'Specify delete all before Copy';
+                    CaptionML = ENU = 'Delete All';
+                    ToolTip = 'Specify delete all before copy';
                 }
 
             }
@@ -52,7 +58,7 @@ page 50102 "Record Copying"
         {
             action("START COPY RECORDS")
             {
-                CaptionML = ENU = 'Copy Selected Records';
+                CaptionML = ENU = 'Copy Records';
                 Promoted = true;
                 PromotedCategory = Process;
                 PromotedIsBig = true;
@@ -65,6 +71,20 @@ page 50102 "Record Copying"
                 begin
                     CurrPage.SetSelectionFilter(RecCopy);
                     RecordCopyMgt.CopyRecords(RecCopy); //START COPY RECORDS
+                end;
+
+            }
+            action(Worksheet)
+            {
+                CaptionML = ENU = 'Worksheet';
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedIsBig = true;
+                ApplicationArea = All;
+
+                trigger OnAction()
+                begin
+                    Page.Run(Page::"Copy Record Worksheet");
                 end;
 
             }
