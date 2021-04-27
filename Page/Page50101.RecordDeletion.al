@@ -53,10 +53,16 @@ page 50101 "Record Deletion"
                     RecDel: Record "Record Deletion Table";
                 begin
                     CurrPage.SetSelectionFilter(RecDel);
-                    RecordDeletionMgt.DeleteRecords(RecDel); //START DELETE RECORDS
+                    if Confirm(cnfDeleteFromHolding, false) then
+                        RecordDeletionMgt.DeleteRecordsFromHolding(RecDel)
+                    else
+                        RecordDeletionMgt.DeleteRecords(RecDel); //START DELETE RECORDS
                 end;
 
             }
         }
     }
+
+    var
+        cnfDeleteFromHolding: Label 'Delete From Holding?';
 }

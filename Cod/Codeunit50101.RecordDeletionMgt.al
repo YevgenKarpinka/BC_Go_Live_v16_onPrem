@@ -51,7 +51,7 @@ codeunit 50101 "Record Deletion Mgt."
         Text0001: Label 'Delete Records?';
         Text0002: Label 'Deleting Records!\Table: #1#######';
 
-    procedure DeleteRecords(RecordDeletionTable: Record "Record Deletion Table")
+    procedure DeleteRecords(var RecordDeletionTable: Record "Record Deletion Table")
     var
         Window: Dialog;
         RecRef: RecordRef;
@@ -68,6 +68,31 @@ codeunit 50101 "Record Deletion Mgt."
                 RecRef.DeleteAll;  //** DELETE DATA FROM TABLES
                 RecRef.Close;
             until RecordDeletionTable.Next = 0;
+
+        Window.Close;
+    end;
+
+    procedure DeleteRecordsFromHolding(var RecordDeletionTable: Record "Record Deletion Table")
+    var
+        Window: Dialog;
+        RecRef: RecordRef;
+        IntegrationCompany: Record "Company Integration";
+    begin
+        if not Confirm(Text0001, false) then
+            exit;
+
+        Window.Open(Text0002);
+
+        if IntegrationCompany.FindSet() then
+            repeat
+                if RecordDeletionTable.FindSet() then
+                    repeat
+                        Window.Update(1, Format(RecordDeletionTable."Table ID"));
+                        RecRef.Open(RecordDeletionTable."Table ID", false, IntegrationCompany."Company Name");
+                        RecRef.DeleteAll;  //** DELETE DATA FROM TABLES
+                        RecRef.Close;
+                    until RecordDeletionTable.Next = 0;
+            until IntegrationCompany.Next() = 0;
 
         Window.Close;
     end;
