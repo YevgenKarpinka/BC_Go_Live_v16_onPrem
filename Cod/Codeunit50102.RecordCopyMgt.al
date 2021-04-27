@@ -106,7 +106,7 @@ codeunit 50102 "Record Copy Mgt."
         RecRefTo: RecordRef;
         IntegrationCompany: Record "Company Integration";
     begin
-        CheckCompanyFrom();
+        // CheckCompanyFrom();
 
         if not Confirm(Text0001, false) then
             exit;
@@ -114,11 +114,13 @@ codeunit 50102 "Record Copy Mgt."
         Window.Open(Text0002);
 
         RecordCopyTable.SetCurrentKey(Rank);
+        IntegrationCompany.SetCurrentKey("Company Name", "Copy Items To");
         IntegrationCompany.SetRange("Copy Items To", true);
-        if IntegrationCompany.FindSet(false, false) then
+        IntegrationCompany.SetFilter("Company Name", '<>%1', CompanyName);
+        if IntegrationCompany.FindSet() then
             repeat
                 Window.Update(2, IntegrationCompany."Company Name");
-                if RecordCopyTable.FindSet(false, false) then
+                if RecordCopyTable.FindSet() then
                     repeat
                         Window.Update(1, Format(RecordCopyTable."Table ID"));
                         RecRefFrom.Open(RecordCopyTable."Table ID", false, CompanyName);
@@ -126,7 +128,7 @@ codeunit 50102 "Record Copy Mgt."
                         Window.Update(3, Format(RecordCopyTable."DeleteAll Before"));
                         if RecordCopyTable."DeleteAll Before" then
                             RecRefTo.DeleteAll();
-                        if RecRefFrom.FindSet(false, false) then
+                        if RecRefFrom.FindSet() then
                             repeat
                                 if RecRefToFindRec(RecRefTo, RecRefFrom) then begin
                                     CopyRecord(RecRefTo, RecRefFrom);
@@ -162,7 +164,7 @@ codeunit 50102 "Record Copy Mgt."
         locField.SetRange(Enabled, TRUE);
         locField.SetRange(ObsoleteState, locField.ObsoleteState::No);
         locField.SetRange(Class, locField.Class::Normal);
-        IF locField.FindSet(false, false) THEN
+        IF locField.FindSet() THEN
             REPEAT
                 if locField.Type = locField.Type::BLOB then
                     RecRefFrom.FIELD(locField."No.").CalcField();
@@ -178,7 +180,7 @@ codeunit 50102 "Record Copy Mgt."
         locField.SetRange(TableNo, RecRefFrom.NUMBER);
         locField.SetRange(Enabled, TRUE);
         locField.SetRange(IsPartOfPrimaryKey, true);
-        if locField.FindSet(false, false) then begin
+        if locField.FindSet() then begin
             repeat
                 RecRefTo.Field(locField."No.").SetRange(RecRefFrom.Field(locField."No.").Value);
             until locField.NEXT = 0;
@@ -209,7 +211,7 @@ codeunit 50102 "Record Copy Mgt."
 
         Window.Open(Text0002);
 
-        if IntegrationCompany.FindSet(false, false) then
+        if IntegrationCompany.FindSet() then
             repeat
                 Window.Update(1, CustomerBankAccount.TableCaption);
                 Window.Update(2, IntegrationCompany."Company Name");
@@ -244,7 +246,7 @@ codeunit 50102 "Record Copy Mgt."
         if not Confirm(Text0001, false) then
             exit;
         Window.Open(Text0003);
-        if IntegrationCompany.FindSet(false, false) then
+        if IntegrationCompany.FindSet() then
             repeat
                 Window.Update(1, IntegrationCompany."Company Name");
                 Customer.ChangeCompany(IntegrationCompany."Company Name");
