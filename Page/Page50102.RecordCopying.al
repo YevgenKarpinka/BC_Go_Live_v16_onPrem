@@ -56,69 +56,96 @@ page 50102 "Record Copying"
     {
         area(processing)
         {
-            action("START COPY RECORDS")
+            group("Copy")
             {
-                CaptionML = ENU = 'Copy Records';
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
-                ApplicationArea = All;
+                CaptionML = ENU = 'Copy',
+                            RUS = 'Copy';
 
-                trigger OnAction()
-                var
-                    RecCopy: Record "Record Copy Table";
-                    RecordCopyMgt: Codeunit "Record Copy Mgt.";
-                begin
-                    CurrPage.SetSelectionFilter(RecCopy);
-                    RecordCopyMgt.CopyRecords(RecCopy); //START COPY RECORDS
-                end;
+                action("START COPY RECORDS")
+                {
+                    CaptionML = ENU = 'Copy Records';
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    ApplicationArea = All;
 
+                    trigger OnAction()
+                    var
+                        RecCopy: Record "Record Copy Table";
+                        RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                    begin
+                        CurrPage.SetSelectionFilter(RecCopy);
+                        RecordCopyMgt.CopyRecords(RecCopy); //START COPY RECORDS
+                    end;
+
+                }
+                action(Worksheet)
+                {
+                    CaptionML = ENU = 'Worksheet';
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    ApplicationArea = All;
+
+                    trigger OnAction()
+                    begin
+                        Page.Run(Page::"Copy Record Worksheet");
+                    end;
+
+                }
             }
-            action(Worksheet)
+            group("Update")
             {
-                CaptionML = ENU = 'Worksheet';
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
-                ApplicationArea = All;
+                CaptionML = ENU = 'Update',
+                            RUS = 'Update';
+                action("UpdateCustBankAcc")
+                {
+                    CaptionML = ENU = 'Update Cust Bank Acc';
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    ApplicationArea = All;
 
-                trigger OnAction()
-                begin
-                    Page.Run(Page::"Copy Record Worksheet");
-                end;
+                    trigger OnAction()
+                    var
+                        RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                    begin
+                        RecordCopyMgt.UpdateBankAccounts();
+                    end;
 
-            }
-            action("UpdateCustBankAcc")
-            {
-                CaptionML = ENU = 'Update Cust Bank Acc';
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
-                ApplicationArea = All;
+                }
+                action("BlockDeduplCust")
+                {
+                    CaptionML = ENU = 'Block Deduplicated Customers';
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    ApplicationArea = All;
 
-                trigger OnAction()
-                var
-                    RecordCopyMgt: Codeunit "Record Copy Mgt.";
-                begin
-                    RecordCopyMgt.UpdateBankAccounts();
-                end;
+                    trigger OnAction()
+                    var
+                        RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                    begin
+                        RecordCopyMgt.BlockDeduplCust();
+                    end;
 
-            }
-            action("BlockDeduplCust")
-            {
-                CaptionML = ENU = 'Block Deduplicated Customers';
-                Promoted = true;
-                PromotedCategory = Process;
-                PromotedIsBig = true;
-                ApplicationArea = All;
+                }
+                action("FixCustomersVATRegNo")
+                {
+                    CaptionML = ENU = 'Fix Customers VATRegNo';
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    ApplicationArea = All;
 
-                trigger OnAction()
-                var
-                    RecordCopyMgt: Codeunit "Record Copy Mgt.";
-                begin
-                    RecordCopyMgt.BlockDeduplCust();
-                end;
+                    trigger OnAction()
+                    var
+                        RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                    begin
+                        RecordCopyMgt.FixCustVATRegNoInHolding();
+                    end;
 
+                }
             }
         }
     }

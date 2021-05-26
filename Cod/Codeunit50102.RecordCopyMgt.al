@@ -256,7 +256,7 @@ codeunit 50102 "Record Copy Mgt."
                 Customer.SetCurrentKey("No.", "Deduplicate Id", Blocked);
                 Customer.SetFilter("Deduplicate Id", '<>%1', blanckGuid);
                 Customer.SetFilter(Blocked, '<>%1', Customer.Blocked::All);
-                if Customer.FindSet(true, false) then
+                if Customer.FindSet(true) then
                     repeat
                         Customer.CalcFields("Balance (LCY)");
                         if Customer."Balance (LCY)" = 0 then begin
@@ -270,4 +270,38 @@ codeunit 50102 "Record Copy Mgt."
         Window.Close;
     end;
 
+    procedure FixCustVATRegNoInHolding()
+    var
+        Customer: Record Customer;
+        updateCustomer: Record Customer;
+        Window: Dialog;
+        IntegrationCompany: Record "Company Integration";
+    begin
+        CheckCompanyFrom();
+        if not Confirm(Text0001, false) then
+            exit;
+
+        Window.Open(Text0003);
+        if IntegrationCompany.FindSet() then
+            repeat
+                if IntegrationCompany."Copy Items From" or IntegrationCompany."Copy Items To" then begin
+                    Window.Update(1, IntegrationCompany."Company Name");
+                    Customer.ChangeCompany(IntegrationCompany."Company Name");
+                    updateCustomer.ChangeCompany(IntegrationCompany."Company Name");
+
+                    // update customers
+                    Customer.SetCurrentKey("No.", "VAT Registration No.", "TAX Registration No.");
+                    Customer.SetRange("VAT Registration No.", '');
+                    Customer.SetFilter("TAX Registration No.", '<>%1', '');
+                    if Customer.FindSet(true) then
+                        repeat
+                            Window.Update(2, Customer."No.");
+                            updateCustomer.Get(Customer."No.");
+                            updateCustomer."VAT Registration No." := updateCustomer."TAX Registration No.";
+                            updateCustomer.Modify()
+                        until Customer.Next() = 0;
+                end;
+            until IntegrationCompany.Next() = 0;
+        Window.Close;
+    end;
 }
