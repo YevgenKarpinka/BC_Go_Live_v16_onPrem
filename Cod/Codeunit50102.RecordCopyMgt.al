@@ -51,6 +51,7 @@ codeunit 50102 "Record Copy Mgt."
         Text0001: Label 'Copy Records to All Holding?';
         Text0002: Label 'Copying Records!\Delete All: #3######\Company: #2########\Table: #1#######';
         Text0003: Label 'Blocking Customers!\Company: #1########\Customer: #2#######';
+        Text0004: Label 'Blocking Job Queue!\Company: #1########\Job Queue: #2#######';
 
     procedure CopyRecordsByCodeFilter(CodeFilter: Code[30]; flgDeleteAll: Boolean)
     var
@@ -300,6 +301,73 @@ codeunit 50102 "Record Copy Mgt."
                             updateCustomer."VAT Registration No." := updateCustomer."TAX Registration No.";
                             updateCustomer.Modify()
                         until Customer.Next() = 0;
+                end;
+            until IntegrationCompany.Next() = 0;
+        Window.Close;
+    end;
+
+    procedure RestartJobQueueInReady()
+    var
+        JobQueueEntry: Record "Job Queue Entry";
+        updateJobQueueEntry: Record "Job Queue Entry";
+        Window: Dialog;
+        IntegrationCompany: Record "Company Integration";
+    begin
+        CheckCompanyFrom();
+        if not Confirm(Text0001, false) then
+            exit;
+
+        Window.Open(Text0004);
+        if IntegrationCompany.FindSet() then
+            repeat
+                if IntegrationCompany."Copy Items From" or IntegrationCompany."Copy Items To" then begin
+                    Window.Update(1, IntegrationCompany."Company Name");
+                    JobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
+                    updateJobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
+
+                    // update customers
+                    JobQueueEntry.SetCurrentKey(Status);
+                    JobQueueEntry.SetRange(Status, JobQueueEntry.Status::Ready);
+                    JobQueueEntry.SetRange(Scheduled, false);
+                    if JobQueueEntry.FindSet(true) then
+                        repeat
+                            Window.Update(2, JobQueueEntry.Description);
+                            updateJobQueueEntry.Get(JobQueueEntry.ID);
+                            updateJobQueueEntry.Restart();
+                        until JobQueueEntry.Next() = 0;
+                end;
+            until IntegrationCompany.Next() = 0;
+        Window.Close;
+    end;
+
+    procedure RestartJobQueueInError()
+    var
+        JobQueueEntry: Record "Job Queue Entry";
+        updateJobQueueEntry: Record "Job Queue Entry";
+        Window: Dialog;
+        IntegrationCompany: Record "Company Integration";
+    begin
+        CheckCompanyFrom();
+        if not Confirm(Text0001, false) then
+            exit;
+
+        Window.Open(Text0004);
+        if IntegrationCompany.FindSet() then
+            repeat
+                if IntegrationCompany."Copy Items From" or IntegrationCompany."Copy Items To" then begin
+                    Window.Update(1, IntegrationCompany."Company Name");
+                    JobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
+                    updateJobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
+
+                    // update customers
+                    JobQueueEntry.SetCurrentKey(Status);
+                    JobQueueEntry.SetRange(Status, JobQueueEntry.Status::Error);
+                    if JobQueueEntry.FindSet(true) then
+                        repeat
+                            Window.Update(2, JobQueueEntry.Description);
+                            updateJobQueueEntry.Get(JobQueueEntry.ID);
+                            updateJobQueueEntry.Restart();
+                        until JobQueueEntry.Next() = 0;
                 end;
             until IntegrationCompany.Next() = 0;
         Window.Close;

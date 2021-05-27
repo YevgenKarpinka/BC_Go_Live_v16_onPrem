@@ -146,6 +146,38 @@ page 50102 "Record Copying"
                     end;
 
                 }
+                action(RestartJobQueueReady)
+                {
+                    CaptionML = ENU = 'Restart Job Queue in Ready';
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    ApplicationArea = All;
+
+                    trigger OnAction()
+                    var
+                        RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                    begin
+                        RecordCopyMgt.RestartJobQueueInReady();
+                    end;
+
+                }
+                action(RestartJobQueueError)
+                {
+                    CaptionML = ENU = 'Restart Job Queue in Error';
+                    Promoted = true;
+                    PromotedCategory = Process;
+                    PromotedIsBig = true;
+                    ApplicationArea = All;
+
+                    trigger OnAction()
+                    var
+                        RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                    begin
+                        RecordCopyMgt.RestartJobQueueInError();
+                    end;
+
+                }
             }
         }
     }
