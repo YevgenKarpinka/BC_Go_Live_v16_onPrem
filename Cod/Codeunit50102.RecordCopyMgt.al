@@ -312,6 +312,8 @@ codeunit 50102 "Record Copy Mgt."
         updateJobQueueEntry: Record "Job Queue Entry";
         Window: Dialog;
         IntegrationCompany: Record "Company Integration";
+        ScheduledTask: Record "Scheduled Task";
+        Language: Codeunit Language;
     begin
         CheckCompanyFrom();
         if not Confirm(Text0001, false) then
@@ -324,6 +326,7 @@ codeunit 50102 "Record Copy Mgt."
                     Window.Update(1, IntegrationCompany."Company Name");
                     JobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
                     updateJobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
+                    ScheduledTask.ChangeCompany(IntegrationCompany."Company Name");
 
                     // update customers
                     JobQueueEntry.SetCurrentKey(Status);
@@ -333,7 +336,18 @@ codeunit 50102 "Record Copy Mgt."
                         repeat
                             Window.Update(2, JobQueueEntry.Description);
                             updateJobQueueEntry.Get(JobQueueEntry.ID);
-                            updateJobQueueEntry.Restart();
+                            if not IsNullGuid(updateJobQueueEntry."System Task ID") then begin
+                                if ScheduledTask.Get(updateJobQueueEntry."System Task ID") then
+                                    TASKSCHEDULER.CancelTask(updateJobQueueEntry."System Task ID");
+                                Clear(updateJobQueueEntry."System Task ID");
+                            end;
+
+                            updateJobQueueEntry."Last Ready State" := CurrentDateTime;
+                            updateJobQueueEntry."User Language ID" := Language.GetLanguageIdOrDefault(Language.GetUserLanguageCode);
+                            updateJobQueueEntry."User ID" := UserId;
+                            updateJobQueueEntry."No. of Attempts to Run" := 0;
+
+                            CODEUNIT.Run(CODEUNIT::"Job Queue - Enqueue", updateJobQueueEntry);
                         until JobQueueEntry.Next() = 0;
                 end;
             until IntegrationCompany.Next() = 0;
@@ -362,7 +376,7 @@ codeunit 50102 "Record Copy Mgt."
                     // update customers
                     JobQueueEntry.SetCurrentKey(Status);
                     JobQueueEntry.SetRange(Status, JobQueueEntry.Status::Error);
-                    if JobQueueEntry.FindSet(true) then
+                    if JobQueueEntry.FindSet() then
                         repeat
                             Window.Update(2, JobQueueEntry.Description);
                             updateJobQueueEntry.Get(JobQueueEntry.ID);
