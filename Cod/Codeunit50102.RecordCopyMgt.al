@@ -306,14 +306,35 @@ codeunit 50102 "Record Copy Mgt."
         Window.Close;
     end;
 
+    local procedure JobQueueRestart(JobQueueEntryID: Guid; _CompanyName: Text[30])
+    var
+        updateJobQueueEntry: Record "Job Queue Entry";
+        ScheduledTask: Record "Scheduled Task";
+        Language: Codeunit Language;
+    begin
+        updateJobQueueEntry.ChangeCompany(_CompanyName);
+        ScheduledTask.ChangeCompany(_CompanyName);
+
+        updateJobQueueEntry.Get(JobQueueEntryID);
+        if not IsNullGuid(updateJobQueueEntry."System Task ID") then begin
+            if ScheduledTask.Get(updateJobQueueEntry."System Task ID") then
+                TASKSCHEDULER.CancelTask(updateJobQueueEntry."System Task ID");
+            Clear(updateJobQueueEntry."System Task ID");
+        end;
+
+        // updateJobQueueEntry."Last Ready State" := CurrentDateTime;
+        // updateJobQueueEntry."User Language ID" := Language.GetLanguageIdOrDefault(Language.GetUserLanguageCode);
+        // updateJobQueueEntry."User ID" := UserId;
+        // updateJobQueueEntry."No. of Attempts to Run" := 0;
+
+        CODEUNIT.Run(CODEUNIT::"Job Queue - Enqueue", updateJobQueueEntry);
+    end;
+
     procedure RestartJobQueueInReady()
     var
         JobQueueEntry: Record "Job Queue Entry";
-        updateJobQueueEntry: Record "Job Queue Entry";
         Window: Dialog;
         IntegrationCompany: Record "Company Integration";
-        ScheduledTask: Record "Scheduled Task";
-        Language: Codeunit Language;
     begin
         CheckCompanyFrom();
         if not Confirm(Text0001, false) then
@@ -325,29 +346,14 @@ codeunit 50102 "Record Copy Mgt."
                 if IntegrationCompany."Copy Items From" or IntegrationCompany."Copy Items To" then begin
                     Window.Update(1, IntegrationCompany."Company Name");
                     JobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
-                    updateJobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
-                    ScheduledTask.ChangeCompany(IntegrationCompany."Company Name");
 
-                    // update customers
                     JobQueueEntry.SetCurrentKey(Status);
                     JobQueueEntry.SetRange(Status, JobQueueEntry.Status::Ready);
                     JobQueueEntry.SetRange(Scheduled, false);
                     if JobQueueEntry.FindSet(true) then
                         repeat
                             Window.Update(2, JobQueueEntry.Description);
-                            updateJobQueueEntry.Get(JobQueueEntry.ID);
-                            if not IsNullGuid(updateJobQueueEntry."System Task ID") then begin
-                                if ScheduledTask.Get(updateJobQueueEntry."System Task ID") then
-                                    TASKSCHEDULER.CancelTask(updateJobQueueEntry."System Task ID");
-                                Clear(updateJobQueueEntry."System Task ID");
-                            end;
-
-                            updateJobQueueEntry."Last Ready State" := CurrentDateTime;
-                            updateJobQueueEntry."User Language ID" := Language.GetLanguageIdOrDefault(Language.GetUserLanguageCode);
-                            updateJobQueueEntry."User ID" := UserId;
-                            updateJobQueueEntry."No. of Attempts to Run" := 0;
-
-                            CODEUNIT.Run(CODEUNIT::"Job Queue - Enqueue", updateJobQueueEntry);
+                            JobQueueRestart(JobQueueEntry.ID, IntegrationCompany."Company Name");
                         until JobQueueEntry.Next() = 0;
                 end;
             until IntegrationCompany.Next() = 0;
@@ -357,7 +363,6 @@ codeunit 50102 "Record Copy Mgt."
     procedure RestartJobQueueInError()
     var
         JobQueueEntry: Record "Job Queue Entry";
-        updateJobQueueEntry: Record "Job Queue Entry";
         Window: Dialog;
         IntegrationCompany: Record "Company Integration";
     begin
@@ -371,16 +376,13 @@ codeunit 50102 "Record Copy Mgt."
                 if IntegrationCompany."Copy Items From" or IntegrationCompany."Copy Items To" then begin
                     Window.Update(1, IntegrationCompany."Company Name");
                     JobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
-                    updateJobQueueEntry.ChangeCompany(IntegrationCompany."Company Name");
 
-                    // update customers
                     JobQueueEntry.SetCurrentKey(Status);
                     JobQueueEntry.SetRange(Status, JobQueueEntry.Status::Error);
                     if JobQueueEntry.FindSet() then
                         repeat
                             Window.Update(2, JobQueueEntry.Description);
-                            updateJobQueueEntry.Get(JobQueueEntry.ID);
-                            updateJobQueueEntry.Restart();
+                            JobQueueRestart(JobQueueEntry.ID, IntegrationCompany."Company Name");
                         until JobQueueEntry.Next() = 0;
                 end;
             until IntegrationCompany.Next() = 0;
