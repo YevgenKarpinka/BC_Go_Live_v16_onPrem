@@ -1,8 +1,8 @@
 {
   "id": "50b0d5f9-b910-4ae7-9fc5-7b613d18560f",
-  "name": "BC_Go_Live_v16",
+  "name": "BC Tools",
   "publisher": "TComTech",
-  "version": "1.0.0.0",
+  "version": "16.0.0.1",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -26,8 +26,8 @@
     {
       "id": "0fb6c640-2664-4f23-82dc-b9139d06c45d",
       "publisher": "TComTech",
-      "name": "Sprut_API_v16",
-      "version": "1.0.0.0"
+      "name": "Sprut Base",
+      "version": "16.0.0.1"
     }
   ],
   "screenshots": [],
@@ -38,7 +38,7 @@
       "to": 50149
     }
   ],
-  "contextSensitiveHelpUrl": "https://BC_Go_Live_v16.com/help/",
+  "contextSensitiveHelpUrl": "https://BC_Tools.com/help/",
   "showMyCode": true,
   "runtime": "5.0"
 }

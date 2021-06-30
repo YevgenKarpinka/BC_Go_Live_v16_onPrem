@@ -309,25 +309,20 @@ codeunit 50102 "Record Copy Mgt."
     local procedure JobQueueRestart(JobQueueEntryID: Guid; _CompanyName: Text[30])
     var
         updateJobQueueEntry: Record "Job Queue Entry";
-        ScheduledTask: Record "Scheduled Task";
-        Language: Codeunit Language;
     begin
         updateJobQueueEntry.ChangeCompany(_CompanyName);
-        ScheduledTask.ChangeCompany(_CompanyName);
 
         updateJobQueueEntry.Get(JobQueueEntryID);
-        if not IsNullGuid(updateJobQueueEntry."System Task ID") then begin
-            if ScheduledTask.Get(updateJobQueueEntry."System Task ID") then
-                TASKSCHEDULER.CancelTask(updateJobQueueEntry."System Task ID");
-            Clear(updateJobQueueEntry."System Task ID");
-        end;
+        Clear(updateJobQueueEntry."System Task ID");
+        updateJobQueueEntry."System Task ID" := TASKSCHEDULER.CREATETASK(
+                                                CODEUNIT::"Job Queue Dispatcher",
+                                                CODEUNIT::"Job Queue Error Handler",
+                                                TRUE, _CompanyName, updateJobQueueEntry."Earliest Start Date/Time",
+                                                updateJobQueueEntry.RecordId);
+        if updateJobQueueEntry.Status <> updateJobQueueEntry.Status::Ready then
+            updateJobQueueEntry.Status := updateJobQueueEntry.Status::Ready;
+        updateJobQueueEntry.Modify();
 
-        // updateJobQueueEntry."Last Ready State" := CurrentDateTime;
-        // updateJobQueueEntry."User Language ID" := Language.GetLanguageIdOrDefault(Language.GetUserLanguageCode);
-        // updateJobQueueEntry."User ID" := UserId;
-        // updateJobQueueEntry."No. of Attempts to Run" := 0;
-
-        CODEUNIT.Run(CODEUNIT::"Job Queue - Enqueue", updateJobQueueEntry);
     end;
 
     procedure RestartJobQueueInReady()
