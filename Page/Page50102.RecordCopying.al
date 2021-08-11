@@ -64,9 +64,9 @@ page 50102 "Record Copying"
                 action("START COPY RECORDS")
                 {
                     CaptionML = ENU = 'Copy Records';
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedIsBig = true;
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
                     ApplicationArea = All;
 
                     trigger OnAction()
@@ -82,9 +82,9 @@ page 50102 "Record Copying"
                 action(Worksheet)
                 {
                     CaptionML = ENU = 'Worksheet';
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedIsBig = true;
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
                     ApplicationArea = All;
 
                     trigger OnAction()
@@ -98,12 +98,28 @@ page 50102 "Record Copying"
             {
                 CaptionML = ENU = 'Update',
                             RUS = 'Update';
+                action("UpdateDescriptinExtended")
+                {
+                    CaptionML = ENU = 'Update Descriptin Extended';
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
+                    ApplicationArea = All;
+
+                    trigger OnAction()
+                    var
+                        RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                    begin
+                        RecordCopyMgt.UpdateDescriptinExtended();
+                    end;
+
+                }
                 action("UpdateCustBankAcc")
                 {
                     CaptionML = ENU = 'Update Cust Bank Acc';
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedIsBig = true;
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
                     ApplicationArea = All;
 
                     trigger OnAction()
@@ -117,9 +133,9 @@ page 50102 "Record Copying"
                 action("BlockDeduplCust")
                 {
                     CaptionML = ENU = 'Block Deduplicated Customers';
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedIsBig = true;
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
                     ApplicationArea = All;
 
                     trigger OnAction()
@@ -133,9 +149,9 @@ page 50102 "Record Copying"
                 action("FixCustomersVATRegNo")
                 {
                     CaptionML = ENU = 'Fix Customers VATRegNo';
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedIsBig = true;
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
                     ApplicationArea = All;
 
                     trigger OnAction()
@@ -149,9 +165,9 @@ page 50102 "Record Copying"
                 action(RestartJobQueueReady)
                 {
                     CaptionML = ENU = 'Restart Job Queue in Ready';
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedIsBig = true;
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
                     ApplicationArea = All;
 
                     trigger OnAction()
@@ -165,9 +181,9 @@ page 50102 "Record Copying"
                 action(RestartJobQueueError)
                 {
                     CaptionML = ENU = 'Restart Job Queue in Error';
-                    Promoted = true;
-                    PromotedCategory = Process;
-                    PromotedIsBig = true;
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
                     ApplicationArea = All;
 
                     trigger OnAction()

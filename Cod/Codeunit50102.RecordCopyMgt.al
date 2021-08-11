@@ -383,4 +383,46 @@ codeunit 50102 "Record Copy Mgt."
             until IntegrationCompany.Next() = 0;
         Window.Close;
     end;
+
+    internal procedure UpdateDescriptinExtended()
+    var
+        BankAccReconLine: Record "Bank Acc. Reconciliation Line";
+        GenJnlLine: Record "Gen. Journal Line";
+        Window: Dialog;
+        IntegrationCompany: Record "Company Integration";
+        blanckGuid: Guid;
+    begin
+        CheckCompanyFrom();
+        if not Confirm(Text0001, false) then
+            exit;
+        Window.Open(Text0003);
+        if IntegrationCompany.FindSet() then
+            repeat
+                Window.Update(1, IntegrationCompany."Company Name");
+
+                BankAccReconLine.ChangeCompany(IntegrationCompany."Company Name");
+                // Update BankAccReconLine Descriptin Extended
+                BankAccReconLine.SetCurrentKey("Description");
+                BankAccReconLine.SetFilter("Description", '<>%1', '');
+                if BankAccReconLine.FindSet(true) then
+                    repeat
+                        Window.Update(2, BankAccReconLine."Statement Line No.");
+                        BankAccReconLine."Description Extended" := BankAccReconLine.Description;
+                        BankAccReconLine.Modify()
+                    until BankAccReconLine.Next() = 0;
+
+                GenJnlLine.ChangeCompany(IntegrationCompany."Company Name");
+                // Update GenJnlLine Descriptin Extended
+                GenJnlLine.SetCurrentKey("Description");
+                GenJnlLine.SetFilter("Description", '<>%1', '');
+                if GenJnlLine.FindSet(true) then
+                    repeat
+                        Window.Update(2, GenJnlLine."Line No.");
+                        GenJnlLine."Description Extended" := GenJnlLine.Description;
+                        GenJnlLine.Modify()
+                    until GenJnlLine.Next() = 0;
+
+            until IntegrationCompany.Next() = 0;
+        Window.Close;
+    end;
 }
