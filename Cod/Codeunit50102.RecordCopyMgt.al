@@ -52,6 +52,7 @@ codeunit 50102 "Record Copy Mgt."
         Text0002: Label 'Copying Records!\Delete All: #3######\Company: #2########\Table: #1#######';
         Text0003: Label 'Blocking Customers!\Company: #1########\Customer: #2#######';
         Text0004: Label 'Blocking Job Queue!\Company: #1########\Job Queue: #2#######';
+        blankGuid: Guid;
 
     procedure CopyRecordsByCodeFilter(CodeFilter: Code[30]; flgDeleteAll: Boolean)
     var
@@ -384,7 +385,7 @@ codeunit 50102 "Record Copy Mgt."
         Window.Close;
     end;
 
-    internal procedure UpdateDescriptinExtended()
+    procedure UpdateDescriptinExtended()
     var
         BankAccReconLine: Record "Bank Acc. Reconciliation Line";
         GenJnlLine: Record "Gen. Journal Line";
@@ -423,6 +424,47 @@ codeunit 50102 "Record Copy Mgt."
                     until GenJnlLine.Next() = 0;
 
             until IntegrationCompany.Next() = 0;
+        Window.Close;
+    end;
+
+    procedure UpdateBCIdCustomerAgreement()
+    var
+        Window: Dialog;
+        CustomerAgreement: Record "Customer Agreement";
+        IntegrationCompany: Record "Company Integration";
+        GLSetup: Record "General Ledger Setup";
+        Integration1C: Codeunit "Integration 1C";
+    begin
+        CheckCompanyFrom();
+
+        if not Confirm(Text0001, false) then
+            exit;
+
+        Window.Open(Text0002);
+
+        if IntegrationCompany.FindSet() then
+            repeat
+                if IntegrationCompany."Copy Items From" or IntegrationCompany."Copy Items To" then begin
+                    Window.Update(1, CustomerAgreement.TableCaption);
+                    Window.Update(2, IntegrationCompany."Company Name");
+                    CustomerAgreement.ChangeCompany(IntegrationCompany."Company Name");
+                    GLSetup.ChangeCompany(IntegrationCompany."Company Name");
+                    GLSetup.Get();
+
+                    // update BC Id
+                    CustomerAgreement.Reset();
+                    CustomerAgreement.SetRange("Init 1C", true);
+                    if CustomerAgreement.FindSet() then
+                        repeat
+                            if IsNullGuid(CustomerAgreement."BC Id") then begin
+                                CustomerAgreement."BC Id" := CustomerAgreement.SystemId;
+                                CustomerAgreement.Modify();
+                            end;
+                        until CustomerAgreement.Next() = 0;
+                end;
+
+            until IntegrationCompany.Next() = 0;
+
         Window.Close;
     end;
 }

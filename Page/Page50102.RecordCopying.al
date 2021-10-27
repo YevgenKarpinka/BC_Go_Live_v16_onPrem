@@ -98,6 +98,23 @@ page 50102 "Record Copying"
             {
                 CaptionML = ENU = 'Update',
                             RUS = 'Update';
+
+                action("UpdateCustAgreement")
+                {
+                    CaptionML = ENU = 'Update Cust Agr';
+                    // Promoted = true;
+                    // PromotedCategory = Process;
+                    // PromotedIsBig = true;
+                    ApplicationArea = All;
+
+                    trigger OnAction()
+                    var
+                        RecordCopyMgt: Codeunit "Record Copy Mgt.";
+                    begin
+                        RecordCopyMgt.UpdateBCIdCustomerAgreement();
+                    end;
+
+                }
                 action("UpdateDescriptinExtended")
                 {
                     CaptionML = ENU = 'Update Descriptin Extended';
